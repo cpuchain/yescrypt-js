@@ -6,12 +6,16 @@
         "target": "ES2022",
         "lib": ["ES2016", "ES2021", "ES2022", "ESNext"],
         "module": "CommonJS",
-        "rootDir": "./src",
         "outDir": "./lib",
         "resolveJsonModule": true,
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
         "strict": true,
         "skipLibCheck": true
-    }
+    },
+    "include": [
+        "src",
+        "scripts",
+        "test"
+    ]
 }
