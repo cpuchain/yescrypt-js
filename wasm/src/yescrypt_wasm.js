@@ -467,13 +467,15 @@ var yescrypt_wasm = (() => {
             };
             var wasmExports = await createWasm();
             var ___wasm_call_ctors = wasmExports["e"];
-            var _scrypt_wasm = Module["_scrypt_wasm"] = wasmExports["g"];
-            var _yescrypt_wasm = Module["_yescrypt_wasm"] = wasmExports["h"];
-            var _malloc = Module["_malloc"] = wasmExports["i"];
-            var _free = Module["_free"] = wasmExports["j"];
-            var __emscripten_stack_restore = wasmExports["k"];
-            var __emscripten_stack_alloc = wasmExports["l"];
-            var _emscripten_stack_get_current = wasmExports["m"];
+            var _scrypt_kdf_wasm = Module["_scrypt_kdf_wasm"] = wasmExports["g"];
+            var _malloc = Module["_malloc"] = wasmExports["h"];
+            var _yescrypt_kdf_wasm = Module["_yescrypt_kdf_wasm"] = wasmExports["i"];
+            var _scrypt_hash = Module["_scrypt_hash"] = wasmExports["j"];
+            var _yescrypt_hash = Module["_yescrypt_hash"] = wasmExports["k"];
+            var _free = Module["_free"] = wasmExports["l"];
+            var __emscripten_stack_restore = wasmExports["m"];
+            var __emscripten_stack_alloc = wasmExports["n"];
+            var _emscripten_stack_get_current = wasmExports["o"];
             Module["ccall"] = ccall;
             Module["cwrap"] = cwrap;
 

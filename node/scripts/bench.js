@@ -1,4 +1,4 @@
-const { yescrypt } = require('../index');
+const { yescrypt_kdf } = require('../index');
 
 const tests = 30;
 
@@ -10,7 +10,7 @@ const timeStart = Date.now();
 for (let i = 0; i < tests; ++i) {
     const buf = Buffer.allocUnsafe(4);
     buf.writeUint32BE(i)
-    console.log(yescrypt(buf, Buffer.from(''), N, r).toString('hex'));
+    console.log(yescrypt_kdf(buf, Buffer.from(''), N, r).toString('hex'));
 }
 
 const timeTook = Date.now() - timeStart;

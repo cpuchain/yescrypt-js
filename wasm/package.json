@@ -1,6 +1,6 @@
 {
     "name": "yescrypt-wasm",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "WebAssembly module for Yescrypt",
     "license": "BSD 2-Clause",
     "author": "CPUchain",
@@ -16,7 +16,7 @@
         "lint": "eslint src/**/*.ts scripts/**/*.ts test/*.ts --ignore-pattern src/*.d.ts",
         "build:wasm-bundle": "ts-node scripts/bundle.ts",
         "build:wasm-beautify": "js-beautify src/yescrypt_wasm.js -o src/yescrypt_wasm.js",
-        "build:wasm": "emcc ../yescrypt-c/yescrypt-opt.c ../yescrypt-c/yescrypt.c ../yescrypt-c/sha256.c ../yescrypt-c/insecure_memzero.c -O3 -s WASM=1 -s MODULARIZE=1 -s EXPORTED_FUNCTIONS=\"['_scrypt_wasm', '_yescrypt_wasm', '_malloc', '_free']\" -s EXPORTED_RUNTIME_METHODS=\"['ccall', 'cwrap']\" -s EXPORT_NAME=\"yescrypt_wasm\" -s INITIAL_HEAP=\"33554432\" -o src/yescrypt_wasm.js --emit-tsd yescrypt_wasm.js.d.ts && yarn build:wasm-beautify && yarn build:wasm-bundle",
+        "build:wasm": "emcc ../yescrypt-c/yescrypt-opt.c ../yescrypt-c/yescrypt-common.c ../yescrypt-c/yescrypt.c ../yescrypt-c/sha256.c ../yescrypt-c/insecure_memzero.c -O3 -s WASM=1 -s MODULARIZE=1 -s EXPORTED_FUNCTIONS=\"['_scrypt_hash', '_yescrypt_hash', '_scrypt_kdf_wasm', '_yescrypt_kdf_wasm', '_malloc', '_free']\" -s EXPORTED_RUNTIME_METHODS=\"['ccall', 'cwrap']\" -s EXPORT_NAME=\"yescrypt_wasm\" -s INITIAL_HEAP=\"33554432\" -o src/yescrypt_wasm.js --emit-tsd yescrypt_wasm.js.d.ts && yarn build:wasm-beautify && yarn build:wasm-bundle",
         "build:types": "tsc --declaration --emitDeclarationOnly -p tsconfig.build.json",
         "build": "yarn build:types && webpack",
         "bench": "node scripts/bench.js",

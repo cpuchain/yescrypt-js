@@ -1,31 +1,22 @@
 #include "yescrypt.h"
 
-const char* scrypt_wasm(const char* passwd, uint32_t passwdLen, const char* salt, uint32_t saltLen, uint64_t N, uint32_t r) {
-    char output[32];
+const char* scrypt_kdf_wasm(const char* passwd, uint32_t passwdLen, const char* salt, uint32_t saltLen, uint64_t N, uint32_t r) {
+    char* output = malloc(64);
 
-    scrypt_hash(passwd, passwdLen, salt, saltLen, N, r, output, 32);
-
-    return output;
-}
-
-const char* yescrypt_wasm(const char* passwd, uint32_t passwdLen, const char* salt, uint32_t saltLen, uint64_t N, uint32_t r) {
-    char output[32];
-
-    yescrypt_hash(passwd, passwdLen, salt, saltLen, N, r, output, 32);
+    yescrypt_kdf_wrap(0, passwd, passwdLen, salt, saltLen, N, r, output, 64);
 
     return output;
 }
 
-void scrypt_hash(const char* passwd, uint32_t passwdLen, const char* salt, uint32_t saltLen, uint64_t N, uint32_t r, char* output, uint32_t outputLen) {
-    yescrypt_hasher(0, passwd, passwdLen, salt, saltLen, N, r, output, outputLen);
+const char* yescrypt_kdf_wasm(const char* passwd, uint32_t passwdLen, const char* salt, uint32_t saltLen, uint64_t N, uint32_t r) {
+    char* output = malloc(64);
+
+    yescrypt_kdf_wrap(YESCRYPT_DEFAULTS, passwd, passwdLen, salt, saltLen, N, r, output, 64);
+
+    return output;
 }
 
-void yescrypt_hash(const char* passwd, uint32_t passwdLen, const char* salt, uint32_t saltLen, uint64_t N, uint32_t r, char* output, uint32_t outputLen) {
-    // 182
-    yescrypt_hasher(YESCRYPT_DEFAULTS, passwd, passwdLen, salt, saltLen, N, r, output, outputLen);
-}
-
-void yescrypt_hasher(yescrypt_flags_t flags, const char* passwd, uint32_t passwdLen, const char* salt, uint32_t saltLen, uint64_t N, uint32_t r, char* output, uint32_t outputLen) {
+void yescrypt_kdf_wrap(yescrypt_flags_t flags, const char* passwd, uint32_t passwdLen, const char* salt, uint32_t saltLen, uint64_t N, uint32_t r, char* output, uint32_t outputLen) {
     yescrypt_local_t local;
 
     // Using recommended value from PARAMETERS
@@ -51,7 +42,7 @@ void yescrypt_hasher(yescrypt_flags_t flags, const char* passwd, uint32_t passwd
         (const uint8_t *) salt,
         saltLen,
         &params,
-        (const uint8_t *) output,
+        (uint8_t *) output,
         outputLen
     );
 
@@ -59,4 +50,40 @@ void yescrypt_hasher(yescrypt_flags_t flags, const char* passwd, uint32_t passwd
         // Current version of yescrypt_local won't failed on init and free
         yescrypt_free_local(&local);
     }
+}
+
+const char* scrypt_hash(const char* passwd, uint32_t passwdLen, const char* salt, uint32_t saltLen, uint64_t N, uint32_t r) {
+    // Using recommended value from PARAMETERS
+    yescrypt_params_t params = {
+        .flags = 0,
+        .N = N,
+        .r = r,
+        .p = 1,
+        .t = 0,
+        .g = 0
+    };
+
+    uint8_t* setting = yescrypt_encode_params(&params, (const uint8_t *) salt, saltLen);
+
+    uint8_t* hash = yescrypt((const uint8_t *) passwd, setting);
+
+    return (char *)hash;
+}
+
+const char* yescrypt_hash(const char* passwd, uint32_t passwdLen, const char* salt, uint32_t saltLen, uint64_t N, uint32_t r) {
+    // Using recommended value from PARAMETERS
+    yescrypt_params_t params = {
+        .flags = YESCRYPT_DEFAULTS,
+        .N = N,
+        .r = r,
+        .p = 1,
+        .t = 0,
+        .g = 0
+    };
+
+    uint8_t* setting = yescrypt_encode_params(&params, (const uint8_t *) salt, saltLen);
+
+    uint8_t* hash = yescrypt((const uint8_t *) passwd, setting);
+
+    return (char *)hash;
 }

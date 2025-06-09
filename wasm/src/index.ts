@@ -4,7 +4,7 @@ import yescryptWasm, { MainModule } from './yescrypt_wasm.js';
 
 export * from './utils';
 
-type yescrypt_wasm = (
+type yescrypt_kdf_wasm = (
     passwd: number,
     passwdLen: number,
     salt: number,
@@ -13,31 +13,58 @@ type yescrypt_wasm = (
     r: number,
 ) => number;
 
+type yescrypt_hash = (
+    passwd: number,
+    passwdLen: number,
+    salt: number,
+    saltLen: number,
+    N: bigint,
+    r: number,
+) => string;
+
 export class Yescrypt {
     nByte: number;
     Module: MainModule;
-    scrypt_wasm: yescrypt_wasm;
-    yescrypt_wasm: yescrypt_wasm;
+    scrypt_kdf_wasm: yescrypt_kdf_wasm;
+    yescrypt_kdf_wasm: yescrypt_kdf_wasm;
+    scrypt_hash_: yescrypt_hash;
+    yescrypt_hash_: yescrypt_hash;
 
     constructor(Module: MainModule) {
         this.nByte = 1;
         this.Module = Module;
-        this.scrypt_wasm = this.Module.cwrap('scrypt_wasm', undefined, [
+        this.scrypt_kdf_wasm = this.Module.cwrap('scrypt_kdf_wasm', undefined, [
             'number',
             'number',
             'number',
             'number',
             'number',
             'number',
-        ]) as yescrypt_wasm;
-        this.yescrypt_wasm = this.Module.cwrap('yescrypt_wasm', undefined, [
+        ]) as yescrypt_kdf_wasm;
+        this.yescrypt_kdf_wasm = this.Module.cwrap('yescrypt_kdf_wasm', undefined, [
             'number',
             'number',
             'number',
             'number',
             'number',
             'number',
-        ]) as yescrypt_wasm;
+        ]) as yescrypt_kdf_wasm;
+        this.scrypt_hash_ = this.Module.cwrap('scrypt_hash', 'string', [
+            'number',
+            'number',
+            'number',
+            'number',
+            'number',
+            'number',
+        ]) as yescrypt_hash;
+        this.yescrypt_hash_ = this.Module.cwrap('yescrypt_hash', 'string', [
+            'number',
+            'number',
+            'number',
+            'number',
+            'number',
+            'number',
+        ]) as yescrypt_hash;
     }
 
     static async init() {
@@ -76,16 +103,43 @@ export class Yescrypt {
         this.Module._free(ptr);
     }
 
-    Hash(passwd: Uint8Array, salt: Uint8Array, N = 2048, r = 32, scrypt = false): Uint8Array {
+    scrypt_kdf(passwd: Uint8Array, salt: Uint8Array, N = 2048, r = 32): Uint8Array {
         const passwdPtr = this.arrayToPtr(passwd);
         const saltPtr = this.arrayToPtr(salt);
-        const ptr = scrypt
-            ? this.scrypt_wasm(passwdPtr, passwd.length, saltPtr, salt.length, BigInt(N), r)
-            : this.yescrypt_wasm(passwdPtr, passwd.length, saltPtr, salt.length, BigInt(N), r);
-        const hash = this.ptrToArray(ptr, 32);
+        const ptr = this.scrypt_kdf_wasm(passwdPtr, passwd.length, saltPtr, salt.length, BigInt(N), r);
+        const hash = this.ptrToArray(ptr, 64);
         this.freePtr(passwdPtr);
         this.freePtr(saltPtr);
         this.freePtr(ptr);
         return hash;
+    }
+
+    yescrypt_kdf(passwd: Uint8Array, salt: Uint8Array, N = 2048, r = 32): Uint8Array {
+        const passwdPtr = this.arrayToPtr(passwd);
+        const saltPtr = this.arrayToPtr(salt);
+        const ptr = this.yescrypt_kdf_wasm(passwdPtr, passwd.length, saltPtr, salt.length, BigInt(N), r);
+        const hash = this.ptrToArray(ptr, 64);
+        this.freePtr(passwdPtr);
+        this.freePtr(saltPtr);
+        this.freePtr(ptr);
+        return hash;
+    }
+
+    scrypt_hash(passwd: Uint8Array, salt: Uint8Array, N = 2048, r = 32): string {
+        const passwdPtr = this.arrayToPtr(passwd);
+        const saltPtr = this.arrayToPtr(salt);
+        const ptr = this.scrypt_hash_(passwdPtr, passwd.length, saltPtr, salt.length, BigInt(N), r);
+        this.freePtr(passwdPtr);
+        this.freePtr(saltPtr);
+        return ptr;
+    }
+
+    yescrypt_hash(passwd: Uint8Array, salt: Uint8Array, N = 2048, r = 32): string {
+        const passwdPtr = this.arrayToPtr(passwd);
+        const saltPtr = this.arrayToPtr(salt);
+        const ptr = this.yescrypt_hash_(passwdPtr, passwd.length, saltPtr, salt.length, BigInt(N), r);
+        this.freePtr(passwdPtr);
+        this.freePtr(saltPtr);
+        return ptr;
     }
 }

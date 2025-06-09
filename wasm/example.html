@@ -56,8 +56,10 @@
                             <div class="col-12 col-md-4">
                                 <label for="pbkdf-hash" class="form-label"><b>Hash</b></label>
                                 <select id="pbkdf-hash" class="form-select">
-                                    <option value="yescrypt">Yescrypt</option>
-                                    <option value="scrypt">Scrypt</option>
+                                    <option value="yescrypt_kdf">Yescrypt (KDF)</option>
+                                    <option value="scrypt_kdf">Scrypt (KDF)</option>
+                                    <option value="yescrypt_hash">Yescrypt (Hash)</option>
+                                    <option value="scrypt_hash">Scrypt (Hash)</option>
                                 </select>
                             </div>
                         </div>
@@ -126,20 +128,20 @@
             const N = Number($('#pbkdf-N').val()) || undefined;
             const r = Number($('#pbkdf-r').val()) || undefined;
 
-            const useScrypt = $('#pbkdf-hash').val() === 'scrypt';
-
             updateProgress(0);
 
             const timeStart = Date.now();
 
-            const hashed = bytesToHex(yescrypt.Hash(pass, salt, N, r, useScrypt));
+            const result = yescrypt[$('#pbkdf-hash').val()](pass, salt, N, r);
+
+            const hashed = typeof result === 'string' ? result : bytesToHex(result);
 
             updateProgress(100);
 
             $('#result').empty();
 
             $('#result').append(`
-            <span>Started: N=${N} r=${r} pass=${bytesToHex(pass)} salt=${bytesToHex(salt)} useScrypt=${useScrypt}</span>
+            <span>Started: N=${N} r=${r} pass=${bytesToHex(pass)} salt=${bytesToHex(salt)}</span>
 
             <br>
             <br>

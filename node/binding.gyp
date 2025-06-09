@@ -6,6 +6,7 @@
                 "yescrypt.cc",
                 "../yescrypt-c/sha256.c",
                 "../yescrypt-c/yescrypt.c",
+                "../yescrypt-c/yescrypt-common.c",
                 "../yescrypt-c/yescrypt-opt.c",
                 "../yescrypt-c/insecure_memzero.h",
                 "../yescrypt-c/insecure_memzero.c",

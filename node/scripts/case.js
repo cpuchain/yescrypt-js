@@ -1,5 +1,5 @@
 const { webcrypto: crypto } = require('crypto');
-const { yescrypt } = require('../index');
+const { yescrypt_kdf } = require('../index');
 
 const getRandomHex = () => Buffer.from(crypto.getRandomValues(new Uint8Array(32)));
 
@@ -14,7 +14,7 @@ function createCases() {
         const passwd = getRandomHex().toString('hex');
         const salt = getRandomHex().toString('hex');
 
-        const output = yescrypt(Buffer.from(passwd), Buffer.from(salt));
+        const output = yescrypt_kdf(Buffer.from(passwd), Buffer.from(salt));
         
         cases.push({
             passwd,
