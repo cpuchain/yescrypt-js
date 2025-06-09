@@ -23,7 +23,7 @@ function createCases() {
         });
     }
 
-    console.log(cases);
+    console.log(JSON.stringify(cases, null, 4));
 }
 
 createCases();

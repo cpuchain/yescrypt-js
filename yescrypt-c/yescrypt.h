@@ -344,8 +344,8 @@ extern uint8_t *yescrypt_encode_params(const yescrypt_params_t *params,
 #endif
 
 #endif /* !_YESCRYPT_H_ */
-const char* scrypt_kdf_wasm(const char* passwd, uint32_t passwdLen, const char* salt, uint32_t saltLen, uint64_t N, uint32_t r);
-const char* yescrypt_kdf_wasm(const char* passwd, uint32_t passwdLen, const char* salt, uint32_t saltLen, uint64_t N, uint32_t r);
-void yescrypt_kdf_wrap(yescrypt_flags_t flags, const char* passwd, uint32_t passwdLen, const char* salt, uint32_t saltLen, uint64_t N, uint32_t r, char* output, uint32_t outputLen);
-const char* scrypt_hash(const char* passwd, uint32_t passwdLen, const char* salt, uint32_t saltLen, uint64_t N, uint32_t r);
-const char* yescrypt_hash(const char* passwd, uint32_t passwdLen, const char* salt, uint32_t saltLen, uint64_t N, uint32_t r);
+const char* scrypt_kdf_wasm(const char* passwd, uint32_t passwdLen, const char* salt, uint32_t saltLen, uint64_t N, uint32_t r, uint32_t p, uint32_t t);
+const char* yescrypt_kdf_wasm(const char* passwd, uint32_t passwdLen, const char* salt, uint32_t saltLen, uint64_t N, uint32_t r, uint32_t p, uint32_t t);
+void yescrypt_kdf_wrap(yescrypt_flags_t flags, const char* passwd, uint32_t passwdLen, const char* salt, uint32_t saltLen, uint64_t N, uint32_t r, uint32_t p, uint32_t t, char* output, uint32_t outputLen);
+const char* scrypt_hash(const char* passwd, uint32_t passwdLen, const char* salt, uint32_t saltLen, uint64_t N, uint32_t r, uint32_t p, uint32_t t);
+const char* yescrypt_hash(const char* passwd, uint32_t passwdLen, const char* salt, uint32_t saltLen, uint64_t N, uint32_t r, uint32_t p, uint32_t t);

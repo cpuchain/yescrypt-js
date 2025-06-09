@@ -1,7 +1,7 @@
 import { MainModule } from './yescrypt_wasm.js';
 export * from './utils';
-type yescrypt_kdf_wasm = (passwd: number, passwdLen: number, salt: number, saltLen: number, N: bigint, r: number) => number;
-type yescrypt_hash = (passwd: number, passwdLen: number, salt: number, saltLen: number, N: bigint, r: number) => string;
+type yescrypt_kdf_wasm = (passwd: number, passwdLen: number, salt: number, saltLen: number, N: bigint, r: number, p: number, t: number) => number;
+type yescrypt_hash = (passwd: number, passwdLen: number, salt: number, saltLen: number, N: bigint, r: number, p: number, t: number) => string;
 export declare class Yescrypt {
     nByte: number;
     Module: MainModule;
@@ -14,8 +14,8 @@ export declare class Yescrypt {
     arrayToPtr(array: Uint8Array): number;
     ptrToArray(ptr: number, length: number): Uint8Array;
     freePtr(ptr: number): void;
-    scrypt_kdf(passwd: Uint8Array, salt: Uint8Array, N?: number, r?: number): Uint8Array;
-    yescrypt_kdf(passwd: Uint8Array, salt: Uint8Array, N?: number, r?: number): Uint8Array;
-    scrypt_hash(passwd: Uint8Array, salt: Uint8Array, N?: number, r?: number): string;
-    yescrypt_hash(passwd: Uint8Array, salt: Uint8Array, N?: number, r?: number): string;
+    scrypt_kdf(passwd: Uint8Array, salt: Uint8Array, N?: number, r?: number, p?: number, t?: number): Uint8Array;
+    yescrypt_kdf(passwd: Uint8Array, salt: Uint8Array, N?: number, r?: number, p?: number, t?: number): Uint8Array;
+    scrypt_hash(passwd: Uint8Array, salt: Uint8Array, N?: number, r?: number, p?: number, t?: number): string;
+    yescrypt_hash(passwd: Uint8Array, salt: Uint8Array, N?: number, r?: number, p?: number, t?: number): string;
 }

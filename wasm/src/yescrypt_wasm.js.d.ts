@@ -26,11 +26,11 @@ declare namespace RuntimeExports {
     let HEAPU64: any;
 }
 interface WasmModule {
-  _scrypt_kdf_wasm(_0: number, _1: number, _2: number, _3: number, _4: BigInt, _5: number): number;
+  _scrypt_kdf_wasm(_0: number, _1: number, _2: number, _3: number, _4: BigInt, _5: number, _6: number, _7: number): number;
   _malloc(_0: number): number;
-  _yescrypt_kdf_wasm(_0: number, _1: number, _2: number, _3: number, _4: BigInt, _5: number): number;
-  _scrypt_hash(_0: number, _1: number, _2: number, _3: number, _4: BigInt, _5: number): number;
-  _yescrypt_hash(_0: number, _1: number, _2: number, _3: number, _4: BigInt, _5: number): number;
+  _yescrypt_kdf_wasm(_0: number, _1: number, _2: number, _3: number, _4: BigInt, _5: number, _6: number, _7: number): number;
+  _scrypt_hash(_0: number, _1: number, _2: number, _3: number, _4: BigInt, _5: number, _6: number, _7: number): number;
+  _yescrypt_hash(_0: number, _1: number, _2: number, _3: number, _4: BigInt, _5: number, _6: number, _7: number): number;
   _free(_0: number): void;
 }
 

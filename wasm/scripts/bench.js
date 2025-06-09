@@ -13,7 +13,7 @@ async function bench() {
     for (let i = 0; i < tests; ++i) {
         const buf = Buffer.allocUnsafe(4);
         buf.writeUint32BE(i)
-        yescrypt.yescrypt_kdf(buf, Buffer.from(''), N, r);
+        yescrypt.yescrypt_kdf(buf, Buffer.from(''));
     }
 
     const timeTook = Date.now() - timeStart;

@@ -15,6 +15,11 @@
                     <div class="card-body">
                         <h1 class="card-title text-center mb-4">Yescrypt</h1>
 
+                        <!-- Error message and search -->
+                        <div id="error-message" class="alert alert-warning d-none" role="alert">
+                            Error, yay ∠( ᐛ 」∠)
+                        </div>
+
                         <form action="javascript:;" onsubmit="main()">
 
                         <!-- Password Input -->
@@ -24,7 +29,8 @@
                                 <div id="form-password" class="btn-group option-list" role="group">
                                     <button type="button" class="btn btn-outline-secondary active" data-encoding="NFKC">UTF-8 (NFKC)</button>
                                     <button type="button" class="btn btn-outline-secondary" data-encoding="NFKD">UTF-8 (NFKD)</button>
-                                    <button type="button" class="btn btn-outline-secondary" data-encoding="hex">hex</button>
+                                    <button type="button" class="btn btn-outline-secondary" data-encoding="base64">Base64</button>
+                                    <button type="button" class="btn btn-outline-secondary" data-encoding="hex">Hex</button>
                                 </div>
                             </div>
                             <input id="pbkdf-password" type="text" class="form-control form-control-lg mt-2" value="password" autocomplete="off" />
@@ -37,7 +43,8 @@
                                 <div id="form-salt" class="btn-group option-list" role="group">
                                     <button type="button" class="btn btn-outline-secondary active" data-encoding="NFKC">UTF-8 (NFKC)</button>
                                     <button type="button" class="btn btn-outline-secondary" data-encoding="NFKD">UTF-8 (NFKD)</button>
-                                    <button type="button" class="btn btn-outline-secondary" data-encoding="hex">hex</button>
+                                    <button type="button" class="btn btn-outline-secondary" data-encoding="base64">Base64</button>
+                                    <button type="button" class="btn btn-outline-secondary" data-encoding="hex">Hex</button>
                                 </div>
                             </div>
                             <input id="pbkdf-salt" type="text" class="form-control form-control-lg mt-2" value="salt" autocomplete="off" />
@@ -45,13 +52,21 @@
 
                         <!-- Parameters -->
                         <div class="row mb-4">
-                            <div class="col-12 col-md-4 mb-2 mb-md-0">
+                            <div class="col-12 col-md-2 mb-2 mb-md-0">
                                 <label for="pbkdf-N" class="form-label"><b>N</b></label>
-                                <input id="pbkdf-N" type="text" class="form-control" value="2048"/>
+                                <input id="pbkdf-N" type="text" class="form-control" value="4096"/>
                             </div>
-                            <div class="col-12 col-md-4 mb-2 mb-md-0">
+                            <div class="col-12 col-md-2 mb-2 mb-md-0">
                                 <label for="pbkdf-r" class="form-label"><b>r</b></label>
                                 <input id="pbkdf-r" type="text" class="form-control" value="32"/>
+                            </div>
+                            <div class="col-12 col-md-2 mb-2 mb-md-0">
+                                <label for="pbkdf-p" class="form-label"><b>p</b></label>
+                                <input id="pbkdf-p" type="text" class="form-control" value="1"/>
+                            </div>
+                            <div class="col-12 col-md-2 mb-2 mb-md-0">
+                                <label for="pbkdf-t" class="form-label"><b>t</b></label>
+                                <input id="pbkdf-t" type="text" class="form-control" value="0"/>
                             </div>
                             <div class="col-12 col-md-4">
                                 <label for="pbkdf-hash" class="form-label"><b>Hash</b></label>
@@ -95,7 +110,7 @@
 
     <!-- UI Logic for selector -->
     <script>
-        const { Yescrypt, bytesToHex } = YescryptUmd;
+        const { Yescrypt, base64ToBytes, bytesToHex, hexToBytes } = YescryptUmd;
 
         // Encoding selector - activate only one
         $('.option-list .btn').on('click', function() {
@@ -103,9 +118,21 @@
             $(this).addClass('active');
         });
 
-        // Optionally, you can store the encoding selection as a variable or data- attribute
-        function getSelectedEncoding($group) {
-            return $group.find('.btn.active').data('encoding');
+        const textEncoder = new TextEncoder();
+
+        function getEncodedValue(id) {
+            const encoding = $(`#form-${id} .btn.active`).data('encoding');
+            const input = $(`#pbkdf-${id}`).val();
+
+            if (encoding === 'base64') {
+                return base64ToBytes(input);
+            }
+
+            if (encoding === 'hex') {
+                return hexToBytes(input);
+            }
+
+            return textEncoder.encode(input.normalize(encoding));
         }
 
         // Progress bar update helper
@@ -115,44 +142,51 @@
 
         let yescrypt;
 
-        const textEncoder = new TextEncoder();
+        async function main() {
+            try {
+                if (!yescrypt) {
+                    yescrypt = await Yescrypt.init();
+                }
+                
+                const pass = getEncodedValue('password');
+                const salt = getEncodedValue('salt');
+                
+                const N = Number($('#pbkdf-N').val()) ?? undefined;
+                const r = Number($('#pbkdf-r').val()) ?? undefined;
+                const p = Number($('#pbkdf-p').val()) ?? undefined;
+                const t = Number($('#pbkdf-t').val()) ?? undefined;
+                
+                updateProgress(0);
+                
+                const timeStart = Date.now();
+                
+                const result = yescrypt[$('#pbkdf-hash').val()](pass, salt, N, r, p, t);
+                
+                const hashed = typeof result === 'string' ? result : bytesToHex(result);
+                
+                updateProgress(100);
+                
+                $('#result').empty();
+                
+                $('#result').append(`
+                <span>Started: N=${N} r=${r} p=${p} t=${t} pass=${bytesToHex(pass)} salt=${bytesToHex(salt)}</span>
+                
+                <br>
+                <br>
+                
+                <span>Generated: ${hashed}</span>
+                
+                <br>
+                <br>
+                
+                <span>Completed: ${Date.now() - timeStart}ms</span>
+                `);
 
-        async function main() {       
-            if (!yescrypt) {
-                yescrypt = await Yescrypt.init();
+            } catch (error) {
+                $('#error-message').removeClass('d-none');
+                $('#error-message').empty();
+                $('#error-message').append(error.message);
             }
-            
-            const pass = textEncoder.encode($('#pbkdf-password').val());
-            const salt = textEncoder.encode($('#pbkdf-salt').val());
-
-            const N = Number($('#pbkdf-N').val()) || undefined;
-            const r = Number($('#pbkdf-r').val()) || undefined;
-
-            updateProgress(0);
-
-            const timeStart = Date.now();
-
-            const result = yescrypt[$('#pbkdf-hash').val()](pass, salt, N, r);
-
-            const hashed = typeof result === 'string' ? result : bytesToHex(result);
-
-            updateProgress(100);
-
-            $('#result').empty();
-
-            $('#result').append(`
-            <span>Started: N=${N} r=${r} pass=${bytesToHex(pass)} salt=${bytesToHex(salt)}</span>
-
-            <br>
-            <br>
-
-            <span>Generated: ${hashed}</span>
-
-            <br>
-            <br>
-
-            <span>Completed: ${Date.now() - timeStart}ms</span>
-            `);
         }
     </script>
 </body>

@@ -1,6 +1,6 @@
 {
     "name": "yescrypt-wasm",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "WebAssembly module for Yescrypt",
     "license": "BSD 2-Clause",
     "author": "CPUchain",

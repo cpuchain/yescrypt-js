@@ -8,22 +8,13 @@ type TestCases = {
     salt: string;
     N?: number;
     r?: number;
+    p?: number;
+    t?: number;
     useScrypt?: boolean;
     output: string;
 }[];
 
 const cases: TestCases = [
-    {
-        passwd: 'p',
-        salt: 's',
-        output: '14da86e5f7667a4025b15338ce3b5c600ae7db1f67da7f68e95980a2178c8c95e31936b597255f72d20ac6dac769d23cd6d8dcacd74cc61ec4606ef7380a919b',
-    },
-    {
-        passwd: 'p',
-        salt: 's',
-        useScrypt: true,
-        output: '76653b5d96817b0ee1709c1bca212e6b6a3f29a1907ac0c41fab9529ce5613e35fa9df11e61e44db084a2473252ba6e9d9a60ce12ca9da6d1dd17f9d78307014',
-    },
     // Reference tests
     {
         passwd: '',
@@ -34,11 +25,65 @@ const cases: TestCases = [
         output: '77d6576238657b203b19ca42c18a0497f16b4844e3074ae8dfdffa3fede21442fcd0069ded0948f8326a753a0fc81f17e8d3e0fb2e0d3628cf35e20c38d18906',
     },
     {
+        passwd: 'password',
+        salt: 'NaCl',
+        N: 1024,
+        r: 8,
+        p: 16,
+        useScrypt: true,
+        output: 'fdbabe1c9d3472007856e7190d01e9fe7c6ad7cbc8237830e77376634b3731622eaf30d92e22a3886ff109279d9830dac727afb94a83ee6d8360cbdfa2cc0640',
+    },
+    {
+        passwd: 'pleaseletmein',
+        salt: 'SodiumChloride',
+        N: 16384,
+        r: 8,
+        useScrypt: true,
+        output: '7023bdcb3afd7348461c06cd81fd38ebfda8fbba904f8e3ea9b543f6545da1f2d5432955613f0fcf62d49705242a9af9e61e85dc0d651e40dfcf017b45575887',
+    },
+    /**
+     * Not supported due to OOM for WASM
+    {
+        passwd: 'pleaseletmein',
+        salt: 'SodiumChloride',
+        N: 1048576,
+        r: 8,
+        useScrypt: true,
+        output: '2101cb9b6a511aaeaddbbe09cf70f881ec568d574a2ffd4dabe5ee9820adaa478e56fd8f4ba5d09ffa1c6d927c40f4c337304049e8a952fbcbf45c6fa77a41a4',
+    },
+    **/
+    {
+        passwd: '',
+        salt: '',
+        N: 4,
+        r: 1,
+        useScrypt: true,
+        output: 'efad0c23314cb572bc3cfb1543da42f8a8b073004c866b64ab5055a4f09fa5f571142ebfe7e05a3b92c432f31dea95ad5f9c854b6456462f4bd0f732b7cdc549',
+    },
+    {
         passwd: '',
         salt: '',
         N: 4,
         r: 1,
         output: '0cd5af76eb241df8119a9a122ae36920bcc7f414b9c0d58f45008060dade46b0c80922bdcc16a3ab5d201d4c6140c671be1f75272ca904739d5ad1ff672b0c21',
+    },
+    {
+        passwd: '',
+        salt: '',
+        N: 4,
+        r: 1,
+        p: 1,
+        t: 1,
+        output: '23b6adf0b60c9a997f58583d80cda48c638cdc2f289edf93a70807725a0d35c468ca362c5557cc04b6811e2e730841f526d8f4f7acfbfa9e06fe1f383a71155e',
+    },
+    {
+        passwd: 'p',
+        salt: 's',
+        N: 16,
+        r: 8,
+        p: 1,
+        t: 10,
+        output: 'e1f981733a94052fcd7acb1405df0bbde8e499b6a1331b775909b48c2f516c40dcc8301635b7237b8aa9f170addbc21b9896b6b33eae6af780023d1e973e9a3a',
     },
     {
         passwd: 'p',
@@ -49,54 +94,54 @@ const cases: TestCases = [
     },
     // Generated from case
     {
-        passwd: '345b9dcf1bb52cb1f50bca18f6149de7415b2615d0fe282537ce010cebb34545',
+        passwd: '875ce1f7465d1feef5d629f754c39360df06741aa0accc9cc3457bcbf41083cd',
         salt: 'salt',
-        output: '6f4210c05459b51cb6eb34e84605f819672cdf4df436abfa0a0e8c161c3e1500a4f65e2aad9d1039b317dabbe4eb1a9a20f5a3e9da77921c8770dd04f83aebb9',
+        output: '9039d6b87c5fd06fff6efd38f07c597c73eec699f30c7caa1a50e0c0b38746299d5feb4e36fbf9da4ce5b4305151865e91960977782a4e2032930440974040ef',
     },
     {
-        passwd: 'aa7f6b9ad4a8260bb37ee50989f70df23629b2e9b00885a8670b65cef2254dab',
+        passwd: '970974a6975d6841d4986695868aec7e993babfb12c2ce1ba33f04108561e13a',
         salt: 'salt',
-        output: '2384687ef6ed60a66b0561f73d130ed0d9364f25bfd69b525d4d09eb9f454df5e1c7ecd479a5df9e89ce9077d036e5cc6322bf5b08052787f4d805ba890a329b',
+        output: '92458b692c470922d92463df5d25700a7dbce5dd8f98486e050baf025ca822b67d967b1655cd1565eb6319384c6d988fd536e0dcb2237152ebfd26867edb8aa4',
     },
     {
-        passwd: 'e45d231b0673c1df0a5660ff054992a565c6573edab8e14008af6086c117d3d4',
+        passwd: 'd9302fababfbaf79bb4e0df24452f7896a4618a5c64ecbe453e243f9952bee73',
         salt: 'salt',
-        output: 'b33042e7e7758d72e0751f1a42c1c30dd9895a7180a1234fe5e4ecc07810f3b7734b933d81fddd918c7fc2b1775d2fc52039630932ece1e62d4a2af2a47f2498',
+        output: 'bca00274a51442932a74c72d7b72a1b9a5a032653f92a71924de085e85a6b3db7c127753238a5a62afa49a3eb6a1964f5bdf20ba723d0a88469943cfba4faa02',
     },
     {
-        passwd: 'ec418c1bf9a7760c44e04afad5edcf94b1827142f60f0782585860ba0c9a421f',
+        passwd: 'b9ddad54f42e2ccd63a853bcb383c8997fd625dae3d3e0d3e6935313023f22fc',
         salt: 'salt',
-        output: '6e1689e76363dc0f1c75726ef25349bd48152eaa8d1fca462440fc3f5a7e283a32a85b10bddf521ce525eda3070637acaa2487f9406b8a15bcc27d818fa70ad4',
+        output: '98a5606bc3bd92265c857407cea5aa35266bd480e059bfa26e4f94eb2177afc9bab1f1cea6ead3fade08408cbcc09ea355daed93c3481b79f726819eef60552c',
     },
     {
-        passwd: 'fb61d581e6b99f2c5fa29e7ca559365504476b338e2cf7f0ffe0025efbe8328f',
+        passwd: '4a96b204357218152d29a0573ef98aba97cabf85daa6a81798c9de441cbd7488',
         salt: 'salt',
-        output: 'de9714564b2b9dc000d621c2fd86a061119e7b0affe9b2dd934873bee2613049bae40264f2f8e31da0d92d3422efe5a3c261330a24c693c162679936a8fb59d8',
+        output: 'ca12d55b07093524c6e9d2e1e073637ce316c815ee125a8327219f17171a3cabadec6395a18f43d461983351ff0539f4344f6d3b6636ccaedbc283b6ce7c1e0e',
     },
     {
-        passwd: 'a29919b04dc807b1dc581f71f49ea670cc9a90f79dea7dee2b4980a961a8ac1e',
-        salt: '78744900b7922af5670d40e858151396ec001ed35e91e0a1dc57bf39afd73bd0',
-        output: 'd6348ce8b352ce386ef62f56355b1f62da302afa613be53fdfd2cbc1f37b2aa26e282085d7b97f52ec5c4f9ac82d7e0408163920b9037d9c0385cfd4b41cdf51',
+        passwd: '6dc29548d66f2e79811a209135dc50d0872f2d113f6de6fe22fe4e2c7ca1f91c',
+        salt: 'a5b02d1987e5fdf1cd9f06fdd74c0aee8e43e8305ab367ca150531e8902c1837',
+        output: '5fcfffd773e9ea4b625d6e006d91d498aa09dd2401cfc5a4c4740ae81cf77cf413882518eaca0e20e60e96b3fe68d41b66cd5e8fe29df418f62d0a87b7d2277e',
     },
     {
-        passwd: 'bb74288de0f1eeb46f3c9b015bb5d9b8625e3c9582564654ea10ebd2ac9c460a',
-        salt: '9d6131dca631a3901110b61e289011c0b87d39a257073e4884c95003617e0dc2',
-        output: '76d446bc7e52be635b568fbd227f2d278b04ad257b07646ef5b90d32bb4c09d489079231b950b9377b7cc120ca19efd3d7475458595c64ac4d4305fe5a951702',
+        passwd: '2a85312ac74274b5b0277a98603be55298a8b92e6815f855ed75776b0f202e92',
+        salt: '52024d87fad7c2547704a2fbd485bc9f2931515a1448ca38728e93fad362acf1',
+        output: 'ea38f98a2acd1e606f812df5f84ab5d4be2762ef5f04bec3cae350a99a94b55fc4018cedb72f46792c809d37534d6b1d0427625c3105e4a29874864f60980eb8',
     },
     {
-        passwd: '790d99a453a76b382da2a0019db26a034e72a6b8da93713e1bb3d7a7b588072d',
-        salt: '3c5bb59594ea6adb5b56f652dbec0795514cc179818a8c12d941699c36720ee4',
-        output: '4428224752ddc24cd4c19d3989290242179dc0313a42e4d709c20f9b07b3733f4d3ac993aceb0dffb3364e74078f38a8623a8045e45991cb60f44dd0899b4e01',
+        passwd: '656fdd0a5ac19a13c5de59ffdf1064069fd2f092936ab69ac878f8c3768f5029',
+        salt: '45bf68f1910629ad40a8afc04b89d89ffa445dc3f1c4d2f0e17bb6f98596b13a',
+        output: '0f2828cc4a307161cb523dfdc0f380ebed8a7140a138ba5fbe32c5dd456830bbee63087716eea18829f5ad9d5df943252ba2badd4b2463e2ee6f31b53affece1',
     },
     {
-        passwd: 'c003b766098ea39c1ac90ea18c18addfeb1f2f5abf3963d3d928eefbe1c86311',
-        salt: '528f3b2ab745cd6a982383f04dc70ef0c9ffb7f14637b008b7da1ede683f4077',
-        output: 'a6583e834e96137271cb038378541fb734a6a0e4ca46762611123a33b6d42b317522aa017bda36a1b73111f25796e71fe894cad40535a04e881d10a9da7510d4',
+        passwd: '33d66a2028548f3c8af191401198f60e35b62427756180beeacfacf93b28dc10',
+        salt: '2bb69eb32abc5b0aa2730def5455e1559f4fff989e4c279466568741eccfe07b',
+        output: '759f7995f9808a25c1d65adc8e35d948d34d024b4b3ee2756336837c500ce6807996b73ad13119a0c32235f4651b37e54c051da832b183ee58442c8083109b6f',
     },
     {
-        passwd: '3abab7505195f287466a12b102c49de1df367102e7686d1ee0b80aca8f6371c2',
-        salt: '3b0056683fa997be98c1512024195d1668ffc3250a5a3add12ccadacaf33e537',
-        output: '277b172741a5ede26a53e784c20cfefc04abe91f0e898fb8d219b84b5a42bde3bbe45522c5b44d5db443ae85ec4ee3291506ba24c95c981a0dd891f08c76f7f2',
+        passwd: 'bb752fe351e5649c87facb83d62507bdaf5263529a468a5050001696675a7ae3',
+        salt: 'dd26ba145e22844642fa5de4d007750378ffaeff9390e62c343819e62900c90f',
+        output: 'b4c7af4e8a5ec6934b2a229282506762ec65ef00a460ef4abd2429758c6dcc051f37ff57594ca1a891f9073289fe30e7d5c76a7343dac68edffd3f76c46a0f66',
     },
 ];
 
@@ -108,10 +153,10 @@ describe('Yescrypt (WASM)', () => {
     });
 
     it('Test Cases', () => {
-        for (const { passwd, salt, N, r, useScrypt, output } of cases) {
+        for (const { passwd, salt, N, r, p, t, useScrypt, output } of cases) {
             const hashed = useScrypt
-                ? yescrypt.scrypt_kdf(Buffer.from(passwd), Buffer.from(salt), N, r)
-                : yescrypt.yescrypt_kdf(Buffer.from(passwd), Buffer.from(salt), N, r);
+                ? yescrypt.scrypt_kdf(Buffer.from(passwd), Buffer.from(salt), N, r, p, t)
+                : yescrypt.yescrypt_kdf(Buffer.from(passwd), Buffer.from(salt), N, r, p, t);
 
             assert.strictEqual(output, bytesToHex(hashed).replace('0x', ''));
         }
