@@ -1,0 +1,46 @@
+{
+    "name": "yescrypt",
+    "version": "1.0.3",
+    "description": "Node.js bindings of the Yescrypt hashing algorithm",
+    "license": "BSD 2-Clause",
+    "author": "Alexander Peslyak",
+    "type": "module",
+    "main": "./index.cjs",
+    "module": "./index.js",
+    "types": "./index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./index.js",
+            "require": "./index.cjs",
+            "default": "./index.js"
+        }
+    },
+    "gypfile": true,
+    "keywords": [
+        "yescrypt",
+        "proof-of-work",
+        "hashing",
+        "napi",
+        "node-addon-api"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/cpuchain/yescrypt-js.git"
+    },
+    "scripts": {
+        "lint": "eslint scripts/**/*.ts test/**/*.ts",
+        "bench": "node scripts/bench.js",
+        "test": "tsx --test",
+        "install": "node-gyp rebuild"
+    },
+    "dependencies": {
+        "node-addon-api": "^8.5.0"
+    },
+    "devDependencies": {
+        "@cpuchain/eslint": "^1.0.9",
+        "@types/node": "^22.16.0",
+        "tsc": "^2.0.4",
+        "tsx": "^4.20.3",
+        "typescript": "^5.8.3"
+    }
+}

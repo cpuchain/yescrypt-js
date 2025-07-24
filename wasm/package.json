@@ -1,0 +1,51 @@
+{
+    "name": "yescrypt-wasm",
+    "version": "1.0.3",
+    "description": "WebAssembly module for Yescrypt",
+    "license": "BSD 2-Clause",
+    "author": "CPUchain",
+    "type": "module",
+    "main": "./lib/index.cjs",
+    "module": "./lib/index.js",
+    "browser": "./lib/yescrypt.umd.js",
+    "types": "./lib/index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./lib/index.js",
+            "require": "./lib/index.cjs",
+            "default": "./lib/index.js"
+        }
+    },
+    "keywords": [
+        "yescrypt",
+        "proof-of-work",
+        "hashing",
+        "wasm",
+        "webassembly"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/cpuchain/yescrypt-js.git"
+    },
+    "scripts": {
+        "lint": "eslint src/**/*.ts scripts/**/*.ts test/*.ts --ignore-pattern src/*.d.ts",
+        "build:wasm-bundle": "tsx scripts/bundle.ts",
+        "build:wasm-beautify": "js-beautify src/yescrypt_wasm.js -o src/yescrypt_wasm.js",
+        "build:wasm": "emcc ../yescrypt-c/yescrypt-opt.c ../yescrypt-c/yescrypt-common.c ../yescrypt-c/yescrypt.c ../yescrypt-c/sha256.c ../yescrypt-c/insecure_memzero.c -O3 -s WASM=1 -s MODULARIZE=1 -s EXPORTED_FUNCTIONS=\"['_scrypt_hash', '_yescrypt_hash', '_scrypt_kdf_wasm', '_yescrypt_kdf_wasm', '_malloc', '_free']\" -s EXPORTED_RUNTIME_METHODS=\"['ccall', 'cwrap']\" -s EXPORT_NAME=\"yescrypt_wasm\" -s EXPORT_ES6=\"1\" -s INITIAL_HEAP=\"33554432\" -o src/yescrypt_wasm.js --emit-tsd yescrypt_wasm.d.ts && yarn build:wasm-beautify && yarn build:wasm-bundle",
+        "build": "tsc -p tsconfig.build.json --noEmit && rollup -c",
+        "bench": "node scripts/bench.js",
+        "test": "tsx --test"
+    },
+    "devDependencies": {
+        "@cpuchain/eslint": "^1.0.9",
+        "@cpuchain/rollup": "^1.0.4",
+        "@types/node": "^22.16.0",
+        "js-beautify": "^1.15.4",
+        "tsc": "^2.0.4",
+        "tsx": "^4.20.3",
+        "typescript": "^5.8.3"
+    },
+    "resolutions": {
+        "fast-glob": ">=3.3.3"
+    }
+}

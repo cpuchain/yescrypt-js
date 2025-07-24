@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Yescrypt Browser</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-4">
+        <div class="row justify-content-center">    
+            <div class="col-12 col-sm-10 col-md-8 col-lg-7">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h1 class="card-title text-center mb-4">Yescrypt</h1>
+
+                        <!-- Error message and search -->
+                        <div id="error-message" class="alert alert-warning d-none" role="alert">
+                            Error, yay ∠( ᐛ 」∠)
+                        </div>
+
+                        <form action="javascript:;" onsubmit="main()">
+
+                        <!-- Password Input -->
+                        <div class="mb-3">
+                            <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between">
+                                <label for="pbkdf-password" class="form-label mb-2 mb-sm-0"><b>Password</b></label>
+                                <div id="form-password" class="btn-group option-list" role="group">
+                                    <button type="button" class="btn btn-outline-secondary active" data-encoding="NFKC">UTF-8 (NFKC)</button>
+                                    <button type="button" class="btn btn-outline-secondary" data-encoding="NFKD">UTF-8 (NFKD)</button>
+                                    <button type="button" class="btn btn-outline-secondary" data-encoding="base64">Base64</button>
+                                    <button type="button" class="btn btn-outline-secondary" data-encoding="hex">Hex</button>
+                                </div>
+                            </div>
+                            <input id="pbkdf-password" type="text" class="form-control form-control-lg mt-2" value="password" autocomplete="off" />
+                        </div>
+
+                        <!-- Salt Input -->
+                        <div class="mb-3">
+                            <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between">
+                                <label for="pbkdf-salt" class="form-label mb-2 mb-sm-0"><b>Salt</b></label>
+                                <div id="form-salt" class="btn-group option-list" role="group">
+                                    <button type="button" class="btn btn-outline-secondary active" data-encoding="NFKC">UTF-8 (NFKC)</button>
+                                    <button type="button" class="btn btn-outline-secondary" data-encoding="NFKD">UTF-8 (NFKD)</button>
+                                    <button type="button" class="btn btn-outline-secondary" data-encoding="base64">Base64</button>
+                                    <button type="button" class="btn btn-outline-secondary" data-encoding="hex">Hex</button>
+                                </div>
+                            </div>
+                            <input id="pbkdf-salt" type="text" class="form-control form-control-lg mt-2" value="salt" autocomplete="off" />
+                        </div>
+
+                        <!-- Parameters -->
+                        <div class="row mb-4">
+                            <div class="col-12 col-md-2 mb-2 mb-md-0">
+                                <label for="pbkdf-N" class="form-label"><b>N</b></label>
+                                <input id="pbkdf-N" type="text" class="form-control" value="4096"/>
+                            </div>
+                            <div class="col-12 col-md-2 mb-2 mb-md-0">
+                                <label for="pbkdf-r" class="form-label"><b>r</b></label>
+                                <input id="pbkdf-r" type="text" class="form-control" value="32"/>
+                            </div>
+                            <div class="col-12 col-md-2 mb-2 mb-md-0">
+                                <label for="pbkdf-p" class="form-label"><b>p</b></label>
+                                <input id="pbkdf-p" type="text" class="form-control" value="1"/>
+                            </div>
+                            <div class="col-12 col-md-2 mb-2 mb-md-0">
+                                <label for="pbkdf-t" class="form-label"><b>t</b></label>
+                                <input id="pbkdf-t" type="text" class="form-control" value="0"/>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label for="pbkdf-hash" class="form-label"><b>Hash</b></label>
+                                <select id="pbkdf-hash" class="form-select">
+                                    <option value="yescrypt_kdf">Yescrypt (KDF)</option>
+                                    <option value="scrypt_kdf">Scrypt (KDF)</option>
+                                    <option value="yescrypt_hash">Yescrypt (Hash)</option>
+                                    <option value="scrypt_hash">Scrypt (Hash)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="mb-4">
+                            <button id="pbkdf-submit" class="btn btn-success btn-lg w-100" type="submit" >Compute</button>
+                        </div>
+
+                        </form>
+
+                        <!-- Progress Bar -->
+                        <div class="mb-4">
+                            <div class="progress" style="height: 2rem;">
+                                <div id="progressBar" class="progress-bar bg-info" role="progressbar" style="width: 0%;">0%</div>
+                            </div>
+                        </div>
+
+                        <!-- Result -->
+                        <div id="result"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery + Bootstrap 5 JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Plug in your original JS libraries here -->
+    <script src="./lib/yescrypt.umd.js"></script>
+
+    <!-- UI Logic for selector -->
+    <script>
+        const { Yescrypt, base64ToBytes, bytesToHex, hexToBytes } = YescryptWASM;
+
+        // Encoding selector - activate only one
+        $('.option-list .btn').on('click', function() {
+            $(this).siblings().removeClass('active');
+            $(this).addClass('active');
+        });
+
+        const textEncoder = new TextEncoder();
+
+        function getEncodedValue(id) {
+            const encoding = $(`#form-${id} .btn.active`).data('encoding');
+            const input = $(`#pbkdf-${id}`).val();
+
+            if (encoding === 'base64') {
+                return base64ToBytes(input);
+            }
+
+            if (encoding === 'hex') {
+                return hexToBytes(input);
+            }
+
+            return textEncoder.encode(input.normalize(encoding));
+        }
+
+        // Progress bar update helper
+        function updateProgress(pct) {
+            $('#progressBar').css('width', pct + '%').text(Math.round(pct) + '%');
+        }
+
+        let yescrypt;
+
+        async function main() {
+            try {
+                if (!yescrypt) {
+                    yescrypt = await Yescrypt.init();
+                }
+                
+                const pass = getEncodedValue('password');
+                const salt = getEncodedValue('salt');
+                
+                const N = Number($('#pbkdf-N').val()) ?? undefined;
+                const r = Number($('#pbkdf-r').val()) ?? undefined;
+                const p = Number($('#pbkdf-p').val()) ?? undefined;
+                const t = Number($('#pbkdf-t').val()) ?? undefined;
+                
+                updateProgress(0);
+                
+                const timeStart = Date.now();
+                
+                const result = yescrypt[$('#pbkdf-hash').val()](pass, salt, N, r, p, t);
+                
+                const hashed = typeof result === 'string' ? result : bytesToHex(result);
+                
+                updateProgress(100);
+                
+                $('#result').empty();
+                
+                $('#result').append(`
+                <span>Started: N=${N} r=${r} p=${p} t=${t} pass=${bytesToHex(pass)} salt=${bytesToHex(salt)}</span>
+                
+                <br>
+                <br>
+                
+                <span>Generated: ${hashed}</span>
+                
+                <br>
+                <br>
+                
+                <span>Completed: ${Date.now() - timeStart}ms</span>
+                `);
+
+            } catch (error) {
+                $('#error-message').removeClass('d-none');
+                $('#error-message').empty();
+                $('#error-message').append(error.message);
+            }
+        }
+    </script>
+</body>
+</html>
